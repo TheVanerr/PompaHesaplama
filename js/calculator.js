@@ -227,7 +227,7 @@ function calculate() {
 
 // ── Tab Yönetimi ──────────────────────────────────────────────
 function switchTab(tab) {
-  ['calc', 'catalog', 'method'].forEach(t => {
+  ['calc', 'catalog', 'nozzle', 'method'].forEach(t => {
     const page = document.getElementById('page-' + t);
     const btn  = document.getElementById('tab-' + t + '-btn');
     if (!page || !btn) return;
@@ -251,7 +251,92 @@ function switchTab(tab) {
     }
   }
 }
+// ── Nozzle Kataloğu Render ───────────────────────────────────
+function renderNozzleCatalog() {
+  const container = document.getElementById('nozzle-catalog-content');
+  if (!container) return;
 
+  const nozzles = window.NOZZLES_LECHLER || [];
+  if (!nozzles.length) {
+    container.innerHTML = '<div class="text-center text-slate-400 py-16">Nozzle verisi yüklenemedi.</div>';
+    return;
+  }
+
+  // Seriye göre grupla (650 / 651)
+  const groups = {};
+  for (const n of nozzles) {
+    if (!groups[n.series]) groups[n.series] = [];
+    groups[n.series].push(n);
+  }
+
+  const seriesMeta = {
+    '650': { label: 'Seri 650 — Tam Koni Serbest Jet', colorClass: 'series-650', textClass: 'text-cyan-400', desc: 'Düz delikli, yüksek momentum, geniş açı seçeneği' },
+    '651': { label: 'Seri 651 — Tam Koni Döner Kanatçıklı', colorClass: 'series-651', textClass: 'text-purple-400', desc: 'Spiral insert, homojen dağılım, santrifugal etki' },
+  };
+
+  // Örnek debi hızlı referans basınçları (bar)
+  const REF_P = [1, 3, 5, 10];
+
+  let html = '';
+  for (const series of Object.keys(groups).sort()) {
+    const m = seriesMeta[series] || { label: 'Seri ' + series, colorClass: 'brand-goulds', textClass: 'text-blue-400', desc: '' };
+    const list = groups[series];
+
+    html += `
+      <div class="card-glass rounded-2xl p-5 mb-6">
+        <div class="flex items-center gap-3 mb-1">
+          <div class="w-10 h-10 rounded-xl ${m.colorClass} flex items-center justify-center text-lg font-bold text-white">${series}</div>
+          <div>
+            <h3 class="text-lg font-bold ${m.textClass}">${m.label}</h3>
+            <p class="text-slate-500 text-xs">${m.desc}</p>
+          </div>
+          <span class="ml-auto text-slate-500 text-sm">${list.length} model</span>
+        </div>
+        <p class="text-slate-600 text-xs mb-3 pl-1">Q&#160;[L/dk]&#160;=&#160;K&#160;×&#160;√P&#160;[bar]</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="text-slate-500 border-b border-slate-700">
+                <th class="text-left py-2 px-2">Model</th>
+                <th class="text-center py-2 px-2">Bağlantı</th>
+                <th class="text-center py-2 px-2">Açı</th>
+                <th class="text-center py-2 px-2">K Faktörü</th>
+                <th class="text-center py-2 px-2">Basınç Aralığı</th>
+                ${REF_P.map(p => `<th class="text-center py-2 px-2">Q@${p}bar<br><span class="text-slate-600 font-normal">(L/dk)</span></th>`).join('')}
+                <th class="text-left py-2 px-2">Açıklama</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map((n, i) => `
+                <tr class="${i % 2 === 0 ? 'bg-slate-800/30' : ''} hover:bg-slate-700/30 transition-colors">
+                  <td class="py-1.5 px-2 font-semibold ${m.textClass}">${n.model}</td>
+                  <td class="py-1.5 px-2 text-center text-slate-300">${n.connection}</td>
+                  <td class="py-1.5 px-2 text-center text-slate-300">${n.angle}°</td>
+                  <td class="py-1.5 px-2 text-center text-yellow-400 font-semibold">${n.K}</td>
+                  <td class="py-1.5 px-2 text-center text-slate-400">${n.Pmin}–${n.Pmax} bar</td>
+                  ${REF_P.map(p => {
+                    const q = (n.K * Math.sqrt(p)).toFixed(1);
+                    const oor = p < n.Pmin || p > n.Pmax;
+                    return `<td class="py-1.5 px-2 text-center ${oor ? 'text-slate-600 line-through' : 'text-green-400 font-semibold'}">${oor ? '—' : q}</td>`;
+                  }).join('')}
+                  <td class="py-1.5 px-2 text-slate-500 text-[11px]">${n.desc}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  // Genel bilgi notu
+  html += `
+    <div class="note-box mt-2 mb-8">
+      ℹ️ Her nozzle için referans debiler Q [L/dk] = K × √P [bar] formülüyle hesaplanmıştır.
+      Basınç aralığı dışındaki değerler üstü çizili gösterilmektedir.
+      Gerçek veri için Lechler üretici kataloğu çalıştırılmalıdır.
+    </div>`;
+
+  container.innerHTML = html;
+}
 // ── Pompa Kataloğu Render ─────────────────────────────────────
 function renderCatalog() {
   const container = document.getElementById('catalog-content');
@@ -328,8 +413,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Nozzle debisini ilk yüklemede hesapla
   updateNozzleFlow();
 
-  // Katalog ilk açılışta yükle
+  // Kataloğları ilk açılışta yükle
   renderCatalog();
+  renderNozzleCatalog();
 
   // İlk hesaplamayı çalıştır
   calculate();
