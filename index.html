@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="tr" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pompa Seçim Sistemi</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Space Grotesk', sans-serif; }
+    .gradient-bg {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+    }
+    .card-glass {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .input-style {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: all 0.3s ease;
+    }
+    .input-style:focus {
+      background: rgba(255,255,255,0.12);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+    .brand-leo { background: linear-gradient(135deg, #dc2626, #991b1b); }
+    .brand-goulds { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+    .brand-lowara { background: linear-gradient(135deg, #059669, #047857); }
+    .pump-card {
+      transition: all 0.3s ease;
+      transform: translateY(0);
+    }
+    .pump-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .recommended {
+      animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(59,130,246,0.4); }
+      50% { box-shadow: 0 0 40px rgba(59,130,246,0.6); }
+    }
+    .tooltip {
+      position: relative;
+    }
+    .tooltip:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 100;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.getElementById('page-method'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
+  <style>
+    .tab-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
+    .tab-btn:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+    .tab-active { background: linear-gradient(135deg,#1d4ed8,#0891b2) !important; border-color: #3b82f6 !important; color: #ffffff !important; box-shadow: 0 0 20px rgba(59,130,246,0.35); }
+    .formula-box { background: rgba(15,23,42,0.7); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 20px; text-align: center; margin: 12px 0; }
+    .formula-box .katex { font-size: 1.15em; }
+    .formula-box .katex-display { margin: 0; }
+    .step-badge { min-width: 32px; height: 32px; background: linear-gradient(135deg,#1d4ed8,#0891b2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    .param-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px; }
+    .param-table tr:last-child td { border-bottom: none; }
+    .note-box { background: rgba(59,130,246,0.08); border-left: 3px solid #3b82f6; border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: #94a3b8; margin-top: 12px; }
+    .warn-box { background: rgba(245,158,11,0.08); border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: #94a3b8; margin-top: 12px; }
+  </style>
+ </head>
+ <body class="h-full gradient-bg text-white overflow-auto">
+  <div class="min-h-full p-6"><!-- Header -->
+   <header class="text-center mb-8">
+    <div class="inline-flex items-center gap-3 mb-4">
+     <svg class="w-12 h-12 text-blue-400" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3" /> <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" /> <circle cx="12" cy="12" r="8" stroke-dasharray="4 2" />
+     </svg>
+     <h1 id="main-title" class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">Endüstriyel Pompa Seçim Sistemi</h1>
+    </div>
+    <p class="text-slate-400 text-lg">LEO • GOULDS • LOWARA marka pompalar için akıllı seçim aracı</p>
+   </header>
+
+   <!-- Tab Navigation -->
+   <div class="max-w-7xl mx-auto mb-6 flex gap-3">
+    <button id="tab-calc-btn" onclick="switchTab('calc')" class="tab-btn tab-active px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center gap-2">
+     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+     Pompa Hesap Makinesi
+    </button>
+    <button id="tab-method-btn" onclick="switchTab('method')" class="tab-btn px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center gap-2">
+     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+     Hesaplama Metodolojisi
+    </button>
+   </div>
+
+   <!-- PAGE 1: Calculator -->
+   <div id="page-calc"><!-- Main Content -->
+   <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-6"><!-- Input Panel -->
+    <div class="card-glass rounded-2xl p-6">
+     <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+      <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg> Sistem Parametreleri</h2>
+     <div class="grid md:grid-cols-2 gap-4"><!-- Nozzle Sayısı -->
+      <div class="tooltip" data-tip="Sistemdeki toplam nozzle adedi"><label class="block text-sm text-slate-300 mb-2">Nozzle Sayısı</label> <input type="number" id="nozzle-count" value="4" min="1" max="50" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
+      </div><!-- Nozzle Tipi -->
+      <div class="tooltip" data-tip="Nozzle tipine göre debi ve basınç değişir"><label class="block text-sm text-slate-300 mb-2">Nozzle Tipi</label> <select id="nozzle-type" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none"> <option value="flat">Yassı Püskürtme (Flat Fan)</option> <option value="full-cone">Tam Koni (Full Cone)</option> <option value="hollow-cone">Boş Koni (Hollow Cone)</option> <option value="mist">Sis Nozzle (Mist)</option> <option value="jet">Jet Nozzle</option> </select>
+      </div><!-- Nozzle Debi -->
+      <div class="tooltip" data-tip="Her nozzle'dan geçen su miktarı (L/dk)"><label class="block text-sm text-slate-300 mb-2">Nozzle Debi (L/dk)</label> <input type="number" id="nozzle-flow" value="5" min="0.5" max="100" step="0.5" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
+      </div><!-- İstenilen Basınç -->
+      <div class="tooltip" data-tip="Nozzle'da istenilen çıkış basıncı"><label class="block text-sm text-slate-300 mb-2">İstenilen Basınç (bar)</label> <input type="number" id="required-pressure" value="3" min="0.5" max="20" step="0.5" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
+      </div><!-- Boru Uzunluğu -->
+      <div class="tooltip" data-tip="Toplam boru hattı uzunluğu"><label class="block text-sm text-slate-300 mb-2">Boru Uzunluğu (m)</label> <input type="number" id="pipe-length" value="50" min="1" max="1000" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
+      </div><!-- Boru Çapı -->
+      <div class="tooltip" data-tip="Ana boru hattı iç çapı"><label class="block text-sm text-slate-300 mb-2">Boru Çapı (mm)</label> <select id="pipe-diameter" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none"> <option value="20">DN20 (20 mm)</option> <option value="25">DN25 (25 mm)</option> <option value="32" selected>DN32 (32 mm)</option> <option value="40">DN40 (40 mm)</option> <option value="50">DN50 (50 mm)</option> <option value="65">DN65 (65 mm)</option> <option value="80">DN80 (80 mm)</option> <option value="100">DN100 (100 mm)</option> </select>
+      </div><!-- Boru Malzemesi -->
+      <div class="tooltip" data-tip="Sürtünme kaybı hesabı için malzeme türü"><label class="block text-sm text-slate-300 mb-2">Boru Malzemesi</label> <select id="pipe-material" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none"> <option value="pvc">PVC (Pürüzsüz)</option> <option value="steel" selected>Çelik (Galvanizli)</option> <option value="stainless">Paslanmaz Çelik</option> <option value="copper">Bakır</option> <option value="hdpe">HDPE</option> </select>
+      </div><!-- Dirsek Sayısı -->
+      <div class="tooltip" data-tip="90° dirsek sayısı"><label class="block text-sm text-slate-300 mb-2">90° Dirsek Sayısı</label> <input type="number" id="elbow-count" value="6" min="0" max="50" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
+      </div><!-- Vana Sayısı -->
+      <div class="tooltip" data-tip="Küresel vana sayısı"><label class="block text-sm text-slate-300 mb-2">Vana Sayısı</label> <input type="number" id="valve-count" value="2" min="0" max="20" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
+      </div><!-- Yükseklik Farkı -->
+      <div class="tooltip" data-tip="Pompa ile nozzle arasındaki kot farkı"><label class="block text-sm text-slate-300 mb-2">Yükseklik Farkı (m)</label> <input type="number" id="height-diff" value="5" min="-20" max="100" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
+      </div>
+     </div><!-- Calculate Button --> <button id="calculate-btn" class="w-full mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 
+                       text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 
+                       flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg> Pompa Hesapla ve Seç </button>
+    </div><!-- Results Panel -->
+    <div class="card-glass rounded-2xl p-6">
+     <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+      <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg> Hesaplama Sonuçları</h2><!-- System Requirements -->
+     <div id="system-requirements" class="bg-slate-800/50 rounded-xl p-4 mb-6">
+      <h3 class="text-sm font-medium text-slate-400 mb-3">Sistem Gereksinimleri</h3>
+      <div class="grid grid-cols-2 gap-4 text-sm">
+       <div><span class="text-slate-400">Toplam Debi:</span> <span id="total-flow" class="text-white font-semibold ml-2">-- m³/h</span>
+       </div>
+       <div><span class="text-slate-400">Gerekli Basma Yük.:</span> <span id="total-head" class="text-white font-semibold ml-2">-- m</span>
+       </div>
+       <div><span class="text-slate-400">Sürtünme Kaybı:</span> <span id="friction-loss" class="text-white font-semibold ml-2">-- m</span>
+       </div>
+       <div><span class="text-slate-400">Lokal Kayıplar:</span> <span id="local-loss" class="text-white font-semibold ml-2">-- m</span>
+       </div>
+      </div>
+     </div><!-- Pump Results -->
+     <div id="pump-results" class="space-y-4">
+      <div class="text-center text-slate-400 py-8">
+       <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M13 10V3L4 14h7v7l9-11h-7z" />
+       </svg>
+       <p>Parametreleri girin ve "Pompa Hesapla" butonuna tıklayın</p>
+      </div>
+     </div>
+    </div>
+   </div><!-- Pump Database Info -->
+   <div class="max-w-7xl mx-auto mt-8 card-glass rounded-2xl p-6">
+    <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+     <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+     </svg> Pompa Veritabanı</h2>
+    <div class="grid md:grid-cols-3 gap-4 text-sm">
+     <div class="flex items-center gap-3">
+      <div class="w-4 h-4 rounded brand-leo"></div>
+      <div><span class="font-semibold text-red-400">LEO</span> <span class="text-slate-400 ml-2">XST, LRP, XHm, EDH serileri</span>
+      </div>
+     </div>
+     <div class="flex items-center gap-3">
+      <div class="w-4 h-4 rounded brand-goulds"></div>
+      <div><span class="font-semibold text-blue-400">GOULDS</span> <span class="text-slate-400 ml-2">3656, e-SV, SSV, NPE serileri</span>
+      </div>
+     </div>
+     <div class="flex items-center gap-3">
+      <div class="w-4 h-4 rounded brand-lowara"></div>
+      <div><span class="font-semibold text-green-400">LOWARA</span> <span class="text-slate-400 ml-2">e-HM, e-SV, CEA, CO serileri</span>
+      </div>
+     </div>
+    </div>
+    <p class="text-xs text-slate-500 mt-4">* Veriler üretici datasheetlerinden alınmıştır. Kesin seçim için üretici ile iletişime geçiniz.</p>
+   </div>
+   </div><!-- /page-calc -->
+
+   <!-- PAGE 2: Methodology -->
+   <div id="page-method" style="display:none">
+    <div class="max-w-5xl mx-auto space-y-6">
+
+     <!-- Giriş -->
+     <div class="card-glass rounded-2xl p-6 text-center">
+      <div class="inline-flex items-center gap-3 mb-3">
+       <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+       <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">Hesaplama Metodolojisi</h2>
+      </div>
+      <p class="text-slate-400 max-w-2xl mx-auto">Pompa seçim sisteminde kullanılan mühendislik hesaplarının adım adım, formülleriyle birlikte açıklaması. Hesaplama sırası aşağıdaki gibidir.</p>
+      <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs text-slate-500">
+       <span class="bg-slate-800 px-3 py-1 rounded-full">1 → Debi</span>
+       <span class="text-blue-500">›</span>
+       <span class="bg-slate-800 px-3 py-1 rounded-full">2 → Basınç Yükü</span>
+       <span class="text-blue-500">›</span>
+       <span class="bg-slate-800 px-3 py-1 rounded-full">3 → Sürtünme Kaybı</span>
+       <span class="text-blue-500">›</span>
+       <span class="bg-slate-800 px-3 py-1 rounded-full">4 → Lokal Kayıplar</span>
+       <span class="text-blue-500">›</span>
+       <span class="bg-slate-800 px-3 py-1 rounded-full">5 → Toplam Yük</span>
+       <span class="text-blue-500">›</span>
+       <span class="bg-slate-800 px-3 py-1 rounded-full">6 → Pompa Seçimi</span>
+      </div>
+     </div>
+
+     <!-- ADIM 1: Toplam Debi -->
+     <div class="card-glass rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-5">
+       <div class="step-badge text-white">1</div>
+       <h3 class="text-lg font-semibold text-blue-300">Toplam Sistem Debisi</h3>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Sistemdeki tüm nozzle'ların aynı anda çalıştığı varsayılarak toplam debi hesaplanır. Her nozzle'dan eşit debi geçtiği kabul edilir.</p>
+      <div class="formula-box">$$Q_{toplam,\,L/dk} = n_{nozzle} \times q_{nozzle}$$</div>
+      <div class="formula-box">$$Q_{m^3/h} = \frac{Q_{toplam,\,L/dk} \times 60}{1000}$$</div>
+      <table class="param-table w-full mt-4">
+       <tr><td class="text-slate-400 w-32">$n_{nozzle}$</td><td class="text-slate-300">Sistemdeki toplam nozzle adedi <span class="text-slate-500">[adet]</span></td></tr>
+       <tr><td class="text-slate-400">$q_{nozzle}$</td><td class="text-slate-300">Her nozzle'dan geçen debi <span class="text-slate-500">[L/dk]</span></td></tr>
+       <tr><td class="text-slate-400">$Q$</td><td class="text-slate-300">Pompanın karşılaması gereken toplam debi <span class="text-slate-500">[m³/h]</span></td></tr>
+      </table>
+      <div class="note-box"><strong class="text-blue-400">Örnek:</strong> 4 adet nozzle, her biri 5 L/dk → $Q = 4 \times 5 = 20$ L/dk $= \frac{20 \times 60}{1000} = 1{,}2$ m³/h</div>
+     </div>
+
+     <!-- ADIM 2: Nozzle Basıncı → Basma Yüksekliği -->
+     <div class="card-glass rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-5">
+       <div class="step-badge text-white">2</div>
+       <h3 class="text-lg font-semibold text-blue-300">Nozzle Basıncının Basma Yüksekliğine Dönüşümü</h3>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Kullanıcının girdiği nozzle çıkış basıncı (bar), pompa hesaplamalarında kullanılan su kolonu yüksekliğine (metre) dönüştürülür. Bu dönüşüm, suyun yoğunluğu ve yerçekimi ivmesinden türetilir.</p>
+      <div class="formula-box">$$H_{nozzle} = P_{bar} \times \frac{10^5}{\rho \cdot g} = P_{bar} \times \frac{10^5}{1000 \times 9{,}81} \approx P_{bar} \times 10{,}2 \;\text{[m]}$$</div>
+      <table class="param-table w-full mt-4">
+       <tr><td class="text-slate-400 w-36">$H_{nozzle}$</td><td class="text-slate-300">Nozzle basıncının karşılığı olan basma yüksekliği <span class="text-slate-500">[m]</span></td></tr>
+       <tr><td class="text-slate-400">$P_{bar}$</td><td class="text-slate-300">İstenilen nozzle çıkış basıncı <span class="text-slate-500">[bar]</span></td></tr>
+       <tr><td class="text-slate-400">$\rho$</td><td class="text-slate-300">Suyun yoğunluğu ≈ 1000 kg/m³</td></tr>
+       <tr><td class="text-slate-400">$g$</td><td class="text-slate-300">Yerçekimi ivmesi = 9,81 m/s²</td></tr>
+      </table>
+      <div class="note-box"><strong class="text-blue-400">Örnek:</strong> 3 bar nozzle basıncı → $H_{nozzle} = 3 \times 10{,}2 = 30{,}6$ m su kolonu</div>
+     </div>
+
+     <!-- ADIM 3: Sürtünme Kaybı (Hazen-Williams) -->
+     <div class="card-glass rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-5">
+       <div class="step-badge text-white">3</div>
+       <h3 class="text-lg font-semibold text-blue-300">Sürtünme (Majör) Kayıpları — Hazen-Williams Formülü</h3>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Boru boyunca akışkan ile boru cidarı arasındaki sürtünmeden kaynaklanan basınç kayıpları, su işleri ve yangın sistemlerinde yaygın kullanılan <strong class="text-slate-300">Hazen-Williams</strong> ampirik formülü ile hesaplanır.</p>
+      <div class="formula-box">$$h_f = \frac{10{,}67 \times Q^{1{,}852} \times L}{C^{1{,}852} \times D^{4{,}87}}$$</div>
+      <table class="param-table w-full mt-4">
+       <tr><td class="text-slate-400 w-10">$h_f$</td><td class="text-slate-300">Sürtünme kayıp yüksekliği <span class="text-slate-500">[m]</span></td></tr>
+       <tr><td class="text-slate-400">$Q$</td><td class="text-slate-300">Hacimsel debi <span class="text-slate-500">[m³/s]</span> — hesaplamada m³/h → m³/s dönüşümü: $Q_{m^3/s} = Q_{m^3/h} / 3600$</td></tr>
+       <tr><td class="text-slate-400">$L$</td><td class="text-slate-300">Toplam boru uzunluğu <span class="text-slate-500">[m]</span></td></tr>
+       <tr><td class="text-slate-400">$D$</td><td class="text-slate-300">Boru iç çapı <span class="text-slate-500">[m]</span> — mm → m dönüşümü: $D_m = D_{mm} / 1000$</td></tr>
+       <tr><td class="text-slate-400">$C$</td><td class="text-slate-300">Hazen-Williams pürüzlülük katsayısı <span class="text-slate-500">[boyutsuz]</span> — malzemeye göre değişir</td></tr>
+      </table>
+      <!-- C Value Table -->
+      <div class="mt-5">
+       <p class="text-sm text-slate-400 mb-3 font-medium">Malzemeye Göre Hazen-Williams <em>C</em> Katsayıları:</p>
+       <div class="grid md:grid-cols-2 gap-2">
+        <div class="bg-slate-800/50 rounded-lg p-3 flex justify-between items-center"><span class="text-slate-300 text-sm">PVC (Pürüzsüz)</span><span class="text-green-400 font-bold">C = 150</span></div>
+        <div class="bg-slate-800/50 rounded-lg p-3 flex justify-between items-center"><span class="text-slate-300 text-sm">Paslanmaz Çelik</span><span class="text-green-400 font-bold">C = 140</span></div>
+        <div class="bg-slate-800/50 rounded-lg p-3 flex justify-between items-center"><span class="text-slate-300 text-sm">Bakır</span><span class="text-green-400 font-bold">C = 135</span></div>
+        <div class="bg-slate-800/50 rounded-lg p-3 flex justify-between items-center"><span class="text-slate-300 text-sm">HDPE</span><span class="text-green-400 font-bold">C = 145</span></div>
+        <div class="bg-slate-800/50 rounded-lg p-3 flex justify-between items-center col-span-full md:col-span-1"><span class="text-slate-300 text-sm">Galvanizli Çelik</span><span class="text-yellow-400 font-bold">C = 120</span></div>
+       </div>
+      </div>
+      <div class="note-box mt-4"><strong class="text-blue-400">Not:</strong> C katsayısı yükseldikçe boru daha pürüzsüz demektir ve kayıp azalır. Eski/paslanmış çelik borularda C daha da düşük (90–100) olabilir.</div>
+      <div class="warn-box"><strong class="text-yellow-400">Geçerlilik aralığı:</strong> Hazen-Williams formülü sadece su ve suya yakın akışkanlar için, tam dolgu (basınçlı) akış rejiminde geçerlidir. Çok yüksek veya çok düşük debilerde Darcy-Weisbach formülü tercih edilmelidir.</div>
+     </div>
+
+     <!-- ADIM 4: Akış Hızı -->
+     <div class="card-glass rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-5">
+       <div class="step-badge text-white">4</div>
+       <h3 class="text-lg font-semibold text-blue-300">Boru İçi Akış Hızı</h3>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Lokal kayıplar hesabında kullanılacak ortalama akış hızı, debi ve boru kesit alanından bulunur.</p>
+      <div class="formula-box">$$v = \frac{Q}{A} = \frac{Q}{\pi \left(\dfrac{D}{2}\right)^2} = \frac{4\,Q}{\pi\,D^2}$$</div>
+      <table class="param-table w-full mt-4">
+       <tr><td class="text-slate-400 w-10">$v$</td><td class="text-slate-300">Ortalama akış hızı <span class="text-slate-500">[m/s]</span></td></tr>
+       <tr><td class="text-slate-400">$Q$</td><td class="text-slate-300">Hacimsel debi <span class="text-slate-500">[m³/s]</span></td></tr>
+       <tr><td class="text-slate-400">$A$</td><td class="text-slate-300">Boru kesit alanı <span class="text-slate-500">[m²]</span></td></tr>
+       <tr><td class="text-slate-400">$D$</td><td class="text-slate-300">Boru iç çapı <span class="text-slate-500">[m]</span></td></tr>
+      </table>
+      <div class="note-box"><strong class="text-blue-400">Tasarım önerisi:</strong> Pratik uygulamalarda ana boru hattında akış hızı 0,5 – 2,5 m/s arasında tutulmalıdır. Bu aralığın üzerindeki hızlar aşırı gürültüye ve boru aşınmasına yol açar.</div>
+     </div>
+
+     <!-- ADIM 5: Lokal Kayıplar -->
+     <div class="card-glass rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-5">
+       <div class="step-badge text-white">5</div>
+       <h3 class="text-lg font-semibold text-blue-300">Lokal (Minör) Kayıplar</h3>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Dirsek, vana, t-parça gibi boru bağlantı elemanlarında akışın yön değiştirmesi ve türbülanstan doğan basınç kayıpları direnç katsayısı <em>K</em> yöntemiyle hesaplanır.</p>
+      <div class="formula-box">$$h_L = K_{toplam} \times \frac{v^2}{2\,g}$$</div>
+      <div class="formula-box">$$K_{toplam} = N_{dirsek} \times K_{dirsek} + N_{vana} \times K_{vana}$$</div>
+      <table class="param-table w-full mt-4">
+       <tr><td class="text-slate-400 w-36">$h_L$</td><td class="text-slate-300">Lokal kayıp yüksekliği <span class="text-slate-500">[m]</span></td></tr>
+       <tr><td class="text-slate-400">$K_{toplam}$</td><td class="text-slate-300">Toplam direnç katsayısı <span class="text-slate-500">[boyutsuz]</span></td></tr>
+       <tr><td class="text-slate-400">$v$</td><td class="text-slate-300">Ortalama akış hızı <span class="text-slate-500">[m/s]</span></td></tr>
+       <tr><td class="text-slate-400">$g$</td><td class="text-slate-300">Yerçekimi ivmesi = 9,81 m/s²</td></tr>
+      </table>
+      <div class="mt-5">
+       <p class="text-sm text-slate-400 mb-3 font-medium">Kullanılan K Katsayıları:</p>
+       <div class="grid md:grid-cols-3 gap-2">
+        <div class="bg-slate-800/50 rounded-lg p-3 text-center"><div class="text-slate-400 text-xs mb-1">90° Dirsek</div><div class="text-2xl font-bold text-blue-400">K = 0,9</div></div>
+        <div class="bg-slate-800/50 rounded-lg p-3 text-center"><div class="text-slate-400 text-xs mb-1">Küresel Vana (tam açık)</div><div class="text-2xl font-bold text-blue-400">K = 0,2</div></div>
+        <div class="bg-slate-800/50 rounded-lg p-3 text-center"><div class="text-slate-400 text-xs mb-1">T Parça</div><div class="text-2xl font-bold text-blue-400">K = 1,0</div></div>
+       </div>
+      </div>
+      <div class="note-box mt-4"><strong class="text-blue-400">Örnek:</strong> 6 adet 90° dirsek + 2 adet vana için $K_{toplam} = 6 \times 0{,}9 + 2 \times 0{,}2 = 5{,}4 + 0{,}4 = 5{,}8$. Hız 1,5 m/s ise: $h_L = 5{,}8 \times \frac{1{,}5^2}{2 \times 9{,}81} \approx 0{,}67$ m</div>
+     </div>
+
+     <!-- ADIM 6: Toplam Basma Yüksekliği -->
+     <div class="card-glass rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-5">
+       <div class="step-badge text-white">6</div>
+       <h3 class="text-lg font-semibold text-blue-300">Toplam Sistem Basma Yüksekliği</h3>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Pompanın karşılaması gereken toplam basma yüksekliği (Total Dynamic Head — TDH), tüm kayıp bileşenlerinin toplamıdır. Bu değer pompa seçiminde temel kriter olarak kullanılır.</p>
+      <div class="formula-box">$$H_{toplam} = H_{nozzle} + h_f + h_L + \Delta z$$</div>
+      <table class="param-table w-full mt-4">
+       <tr><td class="text-slate-400 w-36">$H_{toplam}$</td><td class="text-slate-300">Toplam dinamik basma yüksekliği — <strong>TDH</strong> <span class="text-slate-500">[m]</span></td></tr>
+       <tr><td class="text-slate-400">$H_{nozzle}$</td><td class="text-slate-300">Nozzle çalışma basıncının su kolonu karşılığı <span class="text-slate-500">[m]</span></td></tr>
+       <tr><td class="text-slate-400">$h_f$</td><td class="text-slate-300">Hazen-Williams sürtünme kaybı <span class="text-slate-500">[m]</span></td></tr>
+       <tr><td class="text-slate-400">$h_L$</td><td class="text-slate-300">Lokal fitting kayıpları <span class="text-slate-500">[m]</span></td></tr>
+       <tr><td class="text-slate-400">$\Delta z$</td><td class="text-slate-300">Pompa ile nozzle arasındaki statik yükseklik farkı <span class="text-slate-500">[m]</span> (nozzle yüksekteyse pozitif)</td></tr>
+      </table>
+      <div class="warn-box"><strong class="text-yellow-400">Önemli:</strong> $\Delta z$ negatif olabilir (nozzle aşağıdaysa). Bu durumda statik yük pompanın lehine çalışır ve toplam yük azalır.</div>
+      <div class="mt-4 bg-gradient-to-r from-blue-900/30 to-cyan-900/20 rounded-xl p-4 border border-blue-500/20">
+       <p class="text-xs text-slate-500 mb-3 font-medium uppercase tracking-wide">Bileşen Özeti</p>
+       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-sm">
+        <div><div class="text-blue-400 font-bold">$H_{nozzle}$</div><div class="text-slate-500 text-xs">Basınç Yükü</div></div>
+        <div><div class="text-orange-400 font-bold">$h_f$</div><div class="text-slate-500 text-xs">Sürtünme</div></div>
+        <div><div class="text-yellow-400 font-bold">$h_L$</div><div class="text-slate-500 text-xs">Lokal Kayıp</div></div>
+        <div><div class="text-cyan-400 font-bold">$\Delta z$</div><div class="text-slate-500 text-xs">Statik Yük</div></div>
+       </div>
+      </div>
+     </div>
+
+     <!-- ADIM 7: Pompa Seçim Kriterleri -->
+     <div class="card-glass rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-5">
+       <div class="step-badge text-white">7</div>
+       <h3 class="text-lg font-semibold text-blue-300">Pompa Seçim Kriterleri ve Uygunluk Skoru</h3>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Veritabanındaki her pompa için sistem gereksinimleriyle örtüşme derecesi "Uygunluk Skoru" ile ifade edilir. Skor 0–100 arası normalize edilmiş bir değerdir.</p>
+      
+      <p class="text-slate-300 text-sm font-medium mb-2">Seçim Koşulu (Gerekli Şart):</p>
+      <div class="formula-box">$$Q_{min} \leq Q_{sistem} \leq Q_{max} \quad \text{ve} \quad H_{min} \leq H_{sistem} \leq H_{max}$$</div>
+
+      <p class="text-slate-300 text-sm font-medium mt-5 mb-2">Normalize Oranlar:</p>
+      <div class="formula-box">$$r_Q = \frac{Q_{sistem} - Q_{min}}{Q_{max} - Q_{min}}, \qquad r_H = \frac{H_{sistem} - H_{min}}{H_{max} - H_{min}}$$</div>
+
+      <p class="text-slate-300 text-sm font-medium mt-5 mb-2">Çalışma Noktası Verimliliği (Basitleştirilmiş Model):</p>
+      <div class="formula-box">$$\eta_{çalışma} = \eta_{nominal} \times \left(1 - 0{,}20 \left|r_Q - 0{,}5\right| - 0{,}15 \left|r_H - 0{,}5\right|\right)$$</div>
+
+      <p class="text-slate-300 text-sm font-medium mt-5 mb-2">Uygunluk Skoru:</p>
+      <div class="formula-box">$$\text{Skor} = \left(0{,}35 \cdot S_Q \;+\; 0{,}35 \cdot S_H \;+\; 0{,}30 \cdot S_\eta\right) \times 100$$</div>
+      <div class="formula-box">$$S_Q = 1 - 2\left|r_Q - 0{,}5\right|, \quad S_H = 1 - 2\left|r_H - 0{,}5\right|, \quad S_\eta = \frac{\eta_{çalışma}}{100}$$</div>
+
+      <table class="param-table w-full mt-4">
+       <tr><td class="text-slate-400 w-36">$r_Q,\, r_H$</td><td class="text-slate-300">Debi ve basma yüksekliğinin pompa aralığında normalize oranı (0 = min, 1 = max, 0,5 = optimum)</td></tr>
+       <tr><td class="text-slate-400">$S_Q,\, S_H$</td><td class="text-slate-300">Debi ve basma uyum skoru — çalışma noktası orta aralığa ne kadar yakınsa o kadar yüksek</td></tr>
+       <tr><td class="text-slate-400">$S_\eta$</td><td class="text-slate-300">Enerji verimliliği skoru</td></tr>
+       <tr><td class="text-slate-400">$\eta_{nominal}$</td><td class="text-slate-300">Pompanın datasheet verimlilik değeri <span class="text-slate-500">[%]</span></td></tr>
+      </table>
+      <div class="note-box"><strong class="text-blue-400">Yorum:</strong> Skor = 100 ideal çalışma noktasını (orta bölge, maksimum verim) ifade eder. Her marka için en yüksek skor alan pompa seçilerek 3 marka karşılaştırmalı sunulur. En yüksek skorlu pompa "Önerilen" olarak işaretlenir.</div>
+     </div>
+
+     <!-- Güç ve Enerji -->
+     <div class="card-glass rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-5">
+       <div class="step-badge text-white" style="background:linear-gradient(135deg,#059669,#047857)">8</div>
+       <h3 class="text-lg font-semibold text-green-300">Pompanın Hidrolik ve Mil Gücü (Referans)</h3>
+      </div>
+      <p class="text-slate-400 text-sm mb-4">Seçilen pompanın enerji tüketimini doğrulamak için aşağıdaki eşitlikler kullanılabilir.</p>
+      <div class="formula-box">$$P_{hidrolik} = \frac{\rho \cdot g \cdot Q \cdot H_{toplam}}{1000} \quad \text{[kW]}$$</div>
+      <div class="formula-box">$$P_{mil} = \frac{P_{hidrolik}}{\eta_{çalışma}} \quad \text{[kW]}$$</div>
+      <table class="param-table w-full mt-4">
+       <tr><td class="text-slate-400 w-36">$P_{hidrolik}$</td><td class="text-slate-300">Akışkana aktarılan yararlı güç <span class="text-slate-500">[kW]</span></td></tr>
+       <tr><td class="text-slate-400">$P_{mil}$</td><td class="text-slate-300">Motorda tüketilen gerçek güç <span class="text-slate-500">[kW]</span></td></tr>
+       <tr><td class="text-slate-400">$\rho$</td><td class="text-slate-300">Suyun yoğunluğu ≈ 1000 kg/m³</td></tr>
+       <tr><td class="text-slate-400">$Q$</td><td class="text-slate-300">Hacimsel debi <span class="text-slate-500">[m³/s]</span></td></tr>
+       <tr><td class="text-slate-400">$\eta_{çalışma}$</td><td class="text-slate-300">Çalışma noktası verimliliği (0 ile 1 arasında)</td></tr>
+      </table>
+      <div class="warn-box"><strong class="text-yellow-400">Motor seçimi için:</strong> Seçilen motor gücü hesaplanan $P_{mil}$ değerinin en az %10–15 üzerinde olmalıdır. Bu güvenlik marjı ani yükler ve kalkış momenti için gereklidir.</div>
+     </div>
+
+     <!-- Footer note -->
+     <div class="card-glass rounded-2xl p-4 text-center">
+      <p class="text-xs text-slate-500">Bu hesaplama metodolojisi endüstriyel pompa uygulamaları ve boru hattı hidroliği prensiplerine dayanmaktadır. Kritik tesisatlarda kesin sonuçlar için akredite bir mühendise danışınız.</p>
+     </div>
+
+    </div>
+   </div><!-- /page-method -->
+
+  </div>
+  <script>
+    // Pompa Veritabanı - Gerçek Datasheet Değerleri
+    const pumpDatabase = {
+      LEO: [
+        // XST Serisi - Santrifüj Pompalar
+        { model: 'XST 32-125/07', series: 'XST', minFlow: 1.5, maxFlow: 9, minHead: 8, maxHead: 16, power: 0.75, efficiency: 52, rpm: 2900 },
+        { model: 'XST 32-160/11', series: 'XST', minFlow: 2, maxFlow: 12, minHead: 14, maxHead: 28, power: 1.1, efficiency: 55, rpm: 2900 },
+        { model: 'XST 32-200/15', series: 'XST', minFlow: 3, maxFlow: 15, minHead: 25, maxHead: 42, power: 1.5, efficiency: 58, rpm: 2900 },
+        { model: 'XST 40-160/15', series: 'XST', minFlow: 4, maxFlow: 20, minHead: 18, maxHead: 32, power: 1.5, efficiency: 60, rpm: 2900 },
+        { model: 'XST 40-200/22', series: 'XST', minFlow: 5, maxFlow: 25, minHead: 28, maxHead: 48, power: 2.2, efficiency: 62, rpm: 2900 },
+        { model: 'XST 50-125/15', series: 'XST', minFlow: 8, maxFlow: 35, minHead: 10, maxHead: 20, power: 1.5, efficiency: 65, rpm: 2900 },
+        { model: 'XST 50-160/22', series: 'XST', minFlow: 10, maxFlow: 45, minHead: 18, maxHead: 32, power: 2.2, efficiency: 68, rpm: 2900 },
+        { model: 'XST 50-200/30', series: 'XST', minFlow: 12, maxFlow: 55, minHead: 28, maxHead: 48, power: 3.0, efficiency: 70, rpm: 2900 },
+        // LRP Serisi - Inline Pompalar
+        { model: 'LRP 25-60/075', series: 'LRP', minFlow: 0.5, maxFlow: 4, minHead: 5, maxHead: 9, power: 0.75, efficiency: 45, rpm: 2900 },
+        { model: 'LRP 32-80/110', series: 'LRP', minFlow: 1, maxFlow: 8, minHead: 8, maxHead: 14, power: 1.1, efficiency: 50, rpm: 2900 },
+        { model: 'LRP 40-100/150', series: 'LRP', minFlow: 2, maxFlow: 14, minHead: 12, maxHead: 22, power: 1.5, efficiency: 55, rpm: 2900 },
+        { model: 'LRP 50-125/220', series: 'LRP', minFlow: 4, maxFlow: 25, minHead: 16, maxHead: 28, power: 2.2, efficiency: 58, rpm: 2900 },
+        // XHm Serisi - Çok Kademeli
+        { model: 'XHm 2/3', series: 'XHm', minFlow: 0.3, maxFlow: 3, minHead: 18, maxHead: 32, power: 0.37, efficiency: 42, rpm: 2850 },
+        { model: 'XHm 4/4', series: 'XHm', minFlow: 0.5, maxFlow: 5, minHead: 28, maxHead: 48, power: 0.75, efficiency: 48, rpm: 2850 },
+        { model: 'XHm 6/5', series: 'XHm', minFlow: 0.8, maxFlow: 7, minHead: 40, maxHead: 65, power: 1.1, efficiency: 52, rpm: 2850 },
+        { model: 'XHm 8/6', series: 'XHm', minFlow: 1, maxFlow: 10, minHead: 50, maxHead: 80, power: 1.5, efficiency: 55, rpm: 2850 },
+        // EDH Serisi - Yüksek Verimli
+        { model: 'EDH 2-20', series: 'EDH', minFlow: 1, maxFlow: 4, minHead: 12, maxHead: 24, power: 0.55, efficiency: 58, rpm: 2900 },
+        { model: 'EDH 2-40', series: 'EDH', minFlow: 1, maxFlow: 4, minHead: 28, maxHead: 48, power: 1.1, efficiency: 60, rpm: 2900 },
+        { model: 'EDH 4-20', series: 'EDH', minFlow: 2, maxFlow: 6, minHead: 14, maxHead: 26, power: 0.75, efficiency: 62, rpm: 2900 },
+        { model: 'EDH 4-40', series: 'EDH', minFlow: 2, maxFlow: 6, minHead: 32, maxHead: 52, power: 1.5, efficiency: 64, rpm: 2900 }
+      ],
+      GOULDS: [
+        // 3656 Serisi - End Suction
+        { model: '3656 1x1.5-6', series: '3656', minFlow: 1, maxFlow: 8, minHead: 6, maxHead: 15, power: 0.75, efficiency: 48, rpm: 3500 },
+        { model: '3656 1.5x2-6', series: '3656', minFlow: 2, maxFlow: 15, minHead: 8, maxHead: 18, power: 1.1, efficiency: 55, rpm: 3500 },
+        { model: '3656 2x2.5-7', series: '3656', minFlow: 4, maxFlow: 25, minHead: 12, maxHead: 28, power: 2.2, efficiency: 62, rpm: 3500 },
+        { model: '3656 3x3-7', series: '3656', minFlow: 8, maxFlow: 40, minHead: 15, maxHead: 32, power: 3.7, efficiency: 68, rpm: 3500 },
+        { model: '3656 4x4-8', series: '3656', minFlow: 15, maxFlow: 65, minHead: 18, maxHead: 38, power: 5.5, efficiency: 72, rpm: 3500 },
+        // e-SV Serisi - Dikey Çok Kademeli
+        { model: 'e-SV 1/3', series: 'e-SV', minFlow: 0.5, maxFlow: 2.5, minHead: 18, maxHead: 35, power: 0.37, efficiency: 45, rpm: 2900 },
+        { model: 'e-SV 3/5', series: 'e-SV', minFlow: 1, maxFlow: 5, minHead: 32, maxHead: 58, power: 0.75, efficiency: 52, rpm: 2900 },
+        { model: 'e-SV 5/7', series: 'e-SV', minFlow: 2, maxFlow: 8, minHead: 48, maxHead: 82, power: 1.5, efficiency: 58, rpm: 2900 },
+        { model: 'e-SV 10/5', series: 'e-SV', minFlow: 4, maxFlow: 14, minHead: 35, maxHead: 60, power: 2.2, efficiency: 62, rpm: 2900 },
+        { model: 'e-SV 15/3', series: 'e-SV', minFlow: 8, maxFlow: 22, minHead: 22, maxHead: 38, power: 2.2, efficiency: 65, rpm: 2900 },
+        { model: 'e-SV 22/3', series: 'e-SV', minFlow: 12, maxFlow: 32, minHead: 24, maxHead: 42, power: 3.0, efficiency: 68, rpm: 2900 },
+        // SSV Serisi - Paslanmaz Çok Kademeli
+        { model: 'SSV 4/8', series: 'SSV', minFlow: 1.5, maxFlow: 6, minHead: 55, maxHead: 95, power: 1.5, efficiency: 55, rpm: 2900 },
+        { model: 'SSV 8/6', series: 'SSV', minFlow: 3, maxFlow: 12, minHead: 45, maxHead: 75, power: 2.2, efficiency: 60, rpm: 2900 },
+        { model: 'SSV 16/4', series: 'SSV', minFlow: 8, maxFlow: 22, minHead: 32, maxHead: 52, power: 3.0, efficiency: 65, rpm: 2900 },
+        // NPE Serisi - Endüstriyel
+        { model: 'NPE 1x1.5-6', series: 'NPE', minFlow: 1, maxFlow: 10, minHead: 8, maxHead: 18, power: 1.1, efficiency: 52, rpm: 3500 },
+        { model: 'NPE 1.5x2-8', series: 'NPE', minFlow: 3, maxFlow: 18, minHead: 15, maxHead: 32, power: 2.2, efficiency: 58, rpm: 3500 },
+        { model: 'NPE 2x2.5-10', series: 'NPE', minFlow: 6, maxFlow: 30, minHead: 22, maxHead: 45, power: 4.0, efficiency: 65, rpm: 3500 }
+      ],
+      LOWARA: [
+        // e-HM Serisi - Yatay Çok Kademeli
+        { model: 'e-HM 2/02', series: 'e-HM', minFlow: 0.5, maxFlow: 3, minHead: 8, maxHead: 16, power: 0.37, efficiency: 48, rpm: 2900 },
+        { model: 'e-HM 2/05', series: 'e-HM', minFlow: 0.5, maxFlow: 3, minHead: 22, maxHead: 42, power: 0.55, efficiency: 52, rpm: 2900 },
+        { model: 'e-HM 3/03', series: 'e-HM', minFlow: 0.8, maxFlow: 4.5, minHead: 14, maxHead: 28, power: 0.55, efficiency: 55, rpm: 2900 },
+        { model: 'e-HM 3/07', series: 'e-HM', minFlow: 0.8, maxFlow: 4.5, minHead: 38, maxHead: 72, power: 1.1, efficiency: 58, rpm: 2900 },
+        { model: 'e-HM 5/04', series: 'e-HM', minFlow: 1.5, maxFlow: 7, minHead: 22, maxHead: 42, power: 0.75, efficiency: 58, rpm: 2900 },
+        { model: 'e-HM 5/07', series: 'e-HM', minFlow: 1.5, maxFlow: 7, minHead: 42, maxHead: 78, power: 1.5, efficiency: 62, rpm: 2900 },
+        { model: 'e-HM 10/04', series: 'e-HM', minFlow: 4, maxFlow: 14, minHead: 25, maxHead: 48, power: 1.5, efficiency: 62, rpm: 2900 },
+        { model: 'e-HM 10/06', series: 'e-HM', minFlow: 4, maxFlow: 14, minHead: 42, maxHead: 75, power: 2.2, efficiency: 65, rpm: 2900 },
+        // e-SV Serisi - Dikey Çok Kademeli
+        { model: 'e-SV 1SV03', series: 'e-SV', minFlow: 0.3, maxFlow: 2, minHead: 15, maxHead: 28, power: 0.37, efficiency: 45, rpm: 2900 },
+        { model: 'e-SV 1SV06', series: 'e-SV', minFlow: 0.3, maxFlow: 2, minHead: 35, maxHead: 62, power: 0.55, efficiency: 48, rpm: 2900 },
+        { model: 'e-SV 3SV04', series: 'e-SV', minFlow: 1, maxFlow: 4.5, minHead: 25, maxHead: 45, power: 0.55, efficiency: 52, rpm: 2900 },
+        { model: 'e-SV 5SV05', series: 'e-SV', minFlow: 2, maxFlow: 7, minHead: 35, maxHead: 60, power: 1.1, efficiency: 58, rpm: 2900 },
+        { model: 'e-SV 10SV03', series: 'e-SV', minFlow: 5, maxFlow: 14, minHead: 22, maxHead: 38, power: 1.5, efficiency: 62, rpm: 2900 },
+        { model: 'e-SV 15SV02', series: 'e-SV', minFlow: 8, maxFlow: 20, minHead: 16, maxHead: 28, power: 1.5, efficiency: 65, rpm: 2900 },
+        // CEA Serisi - End Suction
+        { model: 'CEA 70/3', series: 'CEA', minFlow: 1, maxFlow: 5, minHead: 18, maxHead: 32, power: 0.55, efficiency: 52, rpm: 2900 },
+        { model: 'CEA 70/5', series: 'CEA', minFlow: 1, maxFlow: 5, minHead: 32, maxHead: 55, power: 1.1, efficiency: 55, rpm: 2900 },
+        { model: 'CEA 120/3', series: 'CEA', minFlow: 2, maxFlow: 8, minHead: 20, maxHead: 35, power: 0.75, efficiency: 58, rpm: 2900 },
+        { model: 'CEA 120/5', series: 'CEA', minFlow: 2, maxFlow: 8, minHead: 38, maxHead: 62, power: 1.5, efficiency: 60, rpm: 2900 },
+        { model: 'CEA 210/3', series: 'CEA', minFlow: 4, maxFlow: 15, minHead: 22, maxHead: 38, power: 1.5, efficiency: 62, rpm: 2900 },
+        { model: 'CEA 210/5', series: 'CEA', minFlow: 4, maxFlow: 15, minHead: 42, maxHead: 68, power: 2.2, efficiency: 65, rpm: 2900 },
+        // CO Serisi - Açık Fanlı
+        { model: 'CO 350/07', series: 'CO', minFlow: 6, maxFlow: 25, minHead: 10, maxHead: 22, power: 0.75, efficiency: 60, rpm: 2900 },
+        { model: 'CO 350/11', series: 'CO', minFlow: 6, maxFlow: 25, minHead: 18, maxHead: 35, power: 1.1, efficiency: 62, rpm: 2900 },
+        { model: 'CO 500/15', series: 'CO', minFlow: 10, maxFlow: 35, minHead: 15, maxHead: 28, power: 1.5, efficiency: 65, rpm: 2900 },
+        { model: 'CO 500/22', series: 'CO', minFlow: 10, maxFlow: 35, minHead: 25, maxHead: 45, power: 2.2, efficiency: 68, rpm: 2900 }
+      ]
+    };
+
+    // Boru malzemesi sürtünme katsayıları (Hazen-Williams C değerleri)
+    const pipeMaterials = {
+      pvc: { c: 150, name: 'PVC' },
+      steel: { c: 120, name: 'Galvanizli Çelik' },
+      stainless: { c: 140, name: 'Paslanmaz Çelik' },
+      copper: { c: 135, name: 'Bakır' },
+      hdpe: { c: 145, name: 'HDPE' }
+    };
+
+    // Nozzle tipleri ve K faktörleri
+    const nozzleTypes = {
+      'flat': { name: 'Yassı Püskürtme', kFactor: 0.85 },
+      'full-cone': { name: 'Tam Koni', kFactor: 0.90 },
+      'hollow-cone': { name: 'Boş Koni', kFactor: 0.88 },
+      'mist': { name: 'Sis Nozzle', kFactor: 0.75 },
+      'jet': { name: 'Jet Nozzle', kFactor: 0.95 }
+    };
+
+    // Lokal kayıp katsayıları
+    const localLossK = {
+      elbow90: 0.9,    // 90° dirsek
+      valve: 0.2,      // Küresel vana (tam açık)
+      tee: 1.0,        // T parça
+      reducer: 0.5     // Redüksiyon
+    };
+
+    // Hazen-Williams formülü ile sürtünme kaybı hesabı
+    function calculateFrictionLoss(flow, length, diameter, cValue) {
+      // flow: m³/h, length: m, diameter: mm
+      // Sonuç: m cinsinden basınç kaybı
+      const Q = flow / 3600; // m³/s
+      const D = diameter / 1000; // m
+      const hf = 10.67 * Math.pow(Q, 1.852) * length / (Math.pow(cValue, 1.852) * Math.pow(D, 4.87));
+      return hf;
+    }
+
+    // Lokal kayıplar hesabı
+    function calculateLocalLoss(flow, diameter, elbowCount, valveCount) {
+      const v = (flow / 3600) / (Math.PI * Math.pow(diameter/2000, 2)); // m/s
+      const totalK = (elbowCount * localLossK.elbow90) + (valveCount * localLossK.valve);
+      const hL = totalK * Math.pow(v, 2) / (2 * 9.81);
+      return hL;
+    }
+
+    // Pompa seçimi
+    function selectPumps(requiredFlow, requiredHead) {
+      const results = [];
+      
+      for (const brand of ['LEO', 'GOULDS', 'LOWARA']) {
+        const pumps = pumpDatabase[brand];
+        const suitablePumps = [];
+        
+        for (const pump of pumps) {
+          // Debi ve basma yüksekliği kontrolü
+          if (requiredFlow >= pump.minFlow && requiredFlow <= pump.maxFlow &&
+              requiredHead >= pump.minHead && requiredHead <= pump.maxHead) {
+            
+            // Çalışma noktası verimliliği hesabı (basitleştirilmiş)
+            const flowRatio = (requiredFlow - pump.minFlow) / (pump.maxFlow - pump.minFlow);
+            const headRatio = (requiredHead - pump.minHead) / (pump.maxHead - pump.minHead);
+            const workingEfficiency = pump.efficiency * (1 - 0.2 * Math.abs(flowRatio - 0.5) - 0.15 * Math.abs(headRatio - 0.5));
+            
+            // Suitability score hesabı
+            const flowScore = 1 - Math.abs(flowRatio - 0.5) * 2;
+            const headScore = 1 - Math.abs(headRatio - 0.5) * 2;
+            const efficiencyScore = workingEfficiency / 100;
+            const suitabilityScore = (flowScore * 0.35 + headScore * 0.35 + efficiencyScore * 0.3) * 100;
+            
+            suitablePumps.push({
+              ...pump,
+              brand,
+              workingEfficiency: Math.round(workingEfficiency),
+              suitabilityScore: Math.round(suitabilityScore),
+              workingFlow: requiredFlow,
+              workingHead: requiredHead
+            });
+          }
+        }
+        
+        // En uygun pompayı seç
+        if (suitablePumps.length > 0) {
+          suitablePumps.sort((a, b) => b.suitabilityScore - a.suitabilityScore);
+          results.push(suitablePumps[0]);
+        }
+      }
+      
+      return results.sort((a, b) => b.suitabilityScore - a.suitabilityScore);
+    }
+
+    // Ana hesaplama fonksiyonu
+    function calculate() {
+      // Değerleri al
+      const nozzleCount = parseInt(document.getElementById('nozzle-count').value);
+      const nozzleType = document.getElementById('nozzle-type').value;
+      const nozzleFlow = parseFloat(document.getElementById('nozzle-flow').value);
+      const requiredPressure = parseFloat(document.getElementById('required-pressure').value);
+      const pipeLength = parseFloat(document.getElementById('pipe-length').value);
+      const pipeDiameter = parseFloat(document.getElementById('pipe-diameter').value);
+      const pipeMaterial = document.getElementById('pipe-material').value;
+      const elbowCount = parseInt(document.getElementById('elbow-count').value);
+      const valveCount = parseInt(document.getElementById('valve-count').value);
+      const heightDiff = parseFloat(document.getElementById('height-diff').value);
+
+      // Toplam debi hesabı (m³/h)
+      const totalFlowLpm = nozzleCount * nozzleFlow; // L/dk
+      const totalFlow = totalFlowLpm * 60 / 1000; // m³/h
+
+      // Basınç -> Basma yüksekliği dönüşümü (1 bar ≈ 10.2 m)
+      const requiredHead = requiredPressure * 10.2;
+
+      // Sürtünme kaybı hesabı
+      const cValue = pipeMaterials[pipeMaterial].c;
+      const frictionLoss = calculateFrictionLoss(totalFlow, pipeLength, pipeDiameter, cValue);
+
+      // Lokal kayıplar
+      const localLoss = calculateLocalLoss(totalFlow, pipeDiameter, elbowCount, valveCount);
+
+      // Toplam basma yüksekliği
+      const totalHead = requiredHead + frictionLoss + localLoss + heightDiff;
+
+      // Sonuçları göster
+      document.getElementById('total-flow').textContent = totalFlow.toFixed(2) + ' m³/h';
+      document.getElementById('total-head').textContent = totalHead.toFixed(1) + ' m';
+      document.getElementById('friction-loss').textContent = frictionLoss.toFixed(2) + ' m';
+      document.getElementById('local-loss').textContent = localLoss.toFixed(2) + ' m';
+
+      // Pompa seçimi
+      const selectedPumps = selectPumps(totalFlow, totalHead);
+      
+      // Sonuçları render et
+      renderPumpResults(selectedPumps, totalFlow, totalHead);
+    }
+
+    function renderPumpResults(pumps, requiredFlow, requiredHead) {
+      const container = document.getElementById('pump-results');
+      
+      if (pumps.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8">
+            <svg class="w-16 h-16 mx-auto mb-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <h3 class="text-lg font-semibold text-red-400 mb-2">Uygun Pompa Bulunamadı</h3>
+            <p class="text-slate-400 text-sm">Gerekli debi: ${requiredFlow.toFixed(2)} m³/h</p>
+            <p class="text-slate-400 text-sm">Gerekli basma yük.: ${requiredHead.toFixed(1)} m</p>
+            <p class="text-slate-500 text-xs mt-4">Parametreleri değiştirmeyi veya daha büyük kapasiteli pompalar için üretici ile iletişime geçmeyi deneyin.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const brandColors = {
+        LEO: 'brand-leo',
+        GOULDS: 'brand-goulds',
+        LOWARA: 'brand-lowara'
+      };
+
+      const brandIcons = {
+        LEO: '🔴',
+        GOULDS: '🔵',
+        LOWARA: '🟢'
+      };
+
+      let html = '';
+      pumps.forEach((pump, index) => {
+        const isRecommended = index === 0;
+        html += `
+          <div class="pump-card ${isRecommended ? 'recommended' : ''} bg-slate-800/60 rounded-xl overflow-hidden border ${isRecommended ? 'border-blue-500' : 'border-slate-700'}">
+            <div class="flex items-stretch">
+              <div class="${brandColors[pump.brand]} px-4 py-6 flex items-center justify-center min-w-[80px]">
+                <span class="text-3xl">${brandIcons[pump.brand]}</span>
+              </div>
+              <div class="flex-1 p-4">
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    ${isRecommended ? '<span class="text-xs bg-blue-500/30 text-blue-300 px-2 py-1 rounded-full mb-2 inline-block">⭐ Önerilen</span>' : ''}
+                    <h3 class="font-bold text-lg">${pump.model}</h3>
+                    <p class="text-sm text-slate-400">${pump.brand} - ${pump.series} Serisi</p>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-2xl font-bold ${isRecommended ? 'text-blue-400' : 'text-slate-300'}">${pump.suitabilityScore}%</div>
+                    <div class="text-xs text-slate-500">Uygunluk</div>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                  <div class="bg-slate-900/50 rounded-lg p-2">
+                    <div class="text-slate-500 text-xs">Debi Aralığı</div>
+                    <div class="font-semibold">${pump.minFlow}-${pump.maxFlow} m³/h</div>
+                  </div>
+                  <div class="bg-slate-900/50 rounded-lg p-2">
+                    <div class="text-slate-500 text-xs">Basma Yük.</div>
+                    <div class="font-semibold">${pump.minHead}-${pump.maxHead} m</div>
+                  </div>
+                  <div class="bg-slate-900/50 rounded-lg p-2">
+                    <div class="text-slate-500 text-xs">Motor Gücü</div>
+                    <div class="font-semibold">${pump.power} kW</div>
+                  </div>
+                  <div class="bg-slate-900/50 rounded-lg p-2">
+                    <div class="text-slate-500 text-xs">Verimlilik</div>
+                    <div class="font-semibold text-green-400">${pump.workingEfficiency}%</div>
+                  </div>
+                </div>
+                
+                <div class="mt-3 flex items-center gap-4 text-xs text-slate-500">
+                  <span>🔄 ${pump.rpm} RPM</span>
+                  <span>📊 Çalışma: ${pump.workingFlow.toFixed(2)} m³/h @ ${pump.workingHead.toFixed(1)} m</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Event listener
+    document.getElementById('calculate-btn').addEventListener('click', calculate);
+
+    // Tab switching
+    function switchTab(tab) {
+      const pageCalc   = document.getElementById('page-calc');
+      const pageMethod = document.getElementById('page-method');
+      const btnCalc    = document.getElementById('tab-calc-btn');
+      const btnMethod  = document.getElementById('tab-method-btn');
+      if (tab === 'calc') {
+        pageCalc.style.display   = '';
+        pageMethod.style.display = 'none';
+        btnCalc.classList.add('tab-active');
+        btnMethod.classList.remove('tab-active');
+      } else {
+        pageCalc.style.display   = 'none';
+        pageMethod.style.display = '';
+        btnCalc.classList.remove('tab-active');
+        btnMethod.classList.add('tab-active');
+        // KaTeX auto-render tetikle (yalnızca ilk açılışta gerekli)
+        if (window.renderMathInElement && !pageMethod.dataset.rendered) {
+          renderMathInElement(pageMethod, {
+            delimiters:[
+              {left:'$$',right:'$$',display:true},
+              {left:'$',right:'$',display:false}
+            ],
+            throwOnError: false
+          });
+          pageMethod.dataset.rendered = '1';
+        }
+      }
+    }
+
+    // Sayfa yüklendiğinde örnek hesaplama
+    calculate();
+  </script>
+ </body>
+</html>
