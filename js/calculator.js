@@ -21,6 +21,56 @@ const BRAND_META = {
   'LOWARA':   { colorClass: 'brand-lowara',   textClass: 'text-green-400',   label: 'LOWARA',   emoji: '🟢' },
 };
 
+// ── Lechler Nozzle Yardımcı Fonksiyonları ────────────────────
+
+/** Model adına göre nozzle objesini döndür */
+function getNozzle(model) {
+  return (window.NOZZLES_LECHLER || []).find(n => n.model === model) || null;
+}
+
+/** Seçili nozzle ve basınca göre debi hesapla (Q = K × √P)
+ *  ve UI'yi güncelle */
+function updateNozzleFlow() {
+  const model    = document.getElementById('nozzle-type')?.value;
+  const pressure = parseFloat(document.getElementById('required-pressure')?.value) || 0;
+  const nozzle   = getNozzle(model);
+
+  if (!nozzle) return;
+
+  // Q = K × √P  [L/dk]
+  const q = nozzle.K * Math.sqrt(Math.max(pressure, 0));
+
+  const flowEl = document.getElementById('nozzle-flow');
+  if (flowEl) flowEl.value = q.toFixed(2);
+
+  // Bilgi kartını güncelle
+  const ni = {
+    conn:   document.getElementById('ni-conn'),
+    angle:  document.getElementById('ni-angle'),
+    k:      document.getElementById('ni-k'),
+    prange: document.getElementById('ni-prange'),
+  };
+  if (ni.conn)   ni.conn.textContent   = nozzle.connection;
+  if (ni.angle)  ni.angle.textContent  = nozzle.angle + '°';
+  if (ni.k)      ni.k.textContent      = nozzle.K;
+  if (ni.prange) ni.prange.textContent = nozzle.Pmin + '–' + nozzle.Pmax + ' bar';
+
+  // Basınç uyarısı
+  if (pressure < nozzle.Pmin || pressure > nozzle.Pmax) {
+    const flowInput = document.getElementById('nozzle-flow');
+    if (flowInput) {
+      flowInput.style.color = '#f87171'; // kırmızı uyarı rengi
+      flowInput.title = `Uyarı: ${nozzle.model} için önerilen basınç aralığı ${nozzle.Pmin}–${nozzle.Pmax} bar`;
+    }
+  } else {
+    const flowInput = document.getElementById('nozzle-flow');
+    if (flowInput) {
+      flowInput.style.color = '';
+      flowInput.title = '';
+    }
+  }
+}
+
 // ── Sabitler ─────────────────────────────────────────────────
 const PIPE_MATERIALS = {
   pvc:       { c: 150, name: 'PVC (Pürüzsüz)' },
@@ -274,6 +324,9 @@ function renderCatalog() {
 document.addEventListener('DOMContentLoaded', () => {
   const calcBtn = document.getElementById('calculate-btn');
   if (calcBtn) calcBtn.addEventListener('click', calculate);
+
+  // Nozzle debisini ilk yüklemede hesapla
+  updateNozzleFlow();
 
   // Katalog ilk açılışta yükle
   renderCatalog();

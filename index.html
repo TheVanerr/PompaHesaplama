@@ -134,24 +134,59 @@
         <input type="number" id="nozzle-count" value="4" min="1" max="50"
                class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
        </div>
-       <div class="tooltip" data-tip="Nozzle tipine gore debi ve basinc degisir">
-        <label class="block text-sm text-slate-300 mb-2">Nozzle Tipi</label>
-        <select id="nozzle-type" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
-         <option value="flat">Yass&#305; P&#252;sk&#252;rtme (Flat Fan)</option>
-         <option value="full-cone">Tam Koni (Full Cone)</option>
-         <option value="hollow-cone">Bo&#351; Koni (Hollow Cone)</option>
-         <option value="mist">Sis Nozzle (Mist)</option>
-         <option value="jet">Jet Nozzle</option>
+       <div class="md:col-span-2">
+        <label class="block text-sm text-slate-300 mb-2 flex items-center gap-2">
+         Lechler Nozzle Modeli
+         <span class="text-xs text-slate-500">(Seri 650 = Serbest Jet &nbsp;·&nbsp; Seri 651 = D&#246;ner Kanat&#231;&#305;kl&#305;)</span>
+        </label>
+        <select id="nozzle-type" onchange="updateNozzleFlow()" class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
+         <optgroup label="─── Seri 650 — Tam Koni Serbest Jet ───">
+          <option value="650.228">650.228 &nbsp;·&nbsp; G 1/4&quot; &nbsp;·&nbsp; 60° &nbsp;·&nbsp; K=0.42</option>
+          <option value="650.308">650.308 &nbsp;·&nbsp; G 3/8&quot; &nbsp;·&nbsp; 60° &nbsp;·&nbsp; K=0.72</option>
+          <option value="650.348">650.348 &nbsp;·&nbsp; G 3/8&quot; &nbsp;·&nbsp; 30° &nbsp;·&nbsp; K=1.06</option>
+          <option value="650.368" selected>650.368 &nbsp;·&nbsp; G 3/8&quot; &nbsp;·&nbsp; 60° &nbsp;·&nbsp; K=1.68</option>
+          <option value="650.388">650.388 &nbsp;·&nbsp; G 3/8&quot; &nbsp;·&nbsp; 80° &nbsp;·&nbsp; K=2.24</option>
+          <option value="650.408">650.408 &nbsp;·&nbsp; G 1/2&quot; &nbsp;·&nbsp; 30° &nbsp;·&nbsp; K=1.10</option>
+          <option value="650.448">650.448 &nbsp;·&nbsp; G 1/2&quot; &nbsp;·&nbsp; 60° &nbsp;·&nbsp; K=3.36</option>
+          <option value="650.488">650.488 &nbsp;·&nbsp; G 1/2&quot; &nbsp;·&nbsp; 90° &nbsp;·&nbsp; K=4.72</option>
+          <option value="650.608">650.608 &nbsp;·&nbsp; G 3/4&quot; &nbsp;·&nbsp; 60° &nbsp;·&nbsp; K=6.90</option>
+          <option value="650.648">650.648 &nbsp;·&nbsp; G 3/4&quot; &nbsp;·&nbsp; 90° &nbsp;·&nbsp; K=9.40</option>
+          <option value="650.808">650.808 &nbsp;·&nbsp; G 1&quot;   &nbsp;·&nbsp; 90° &nbsp;·&nbsp; K=14.0</option>
+          <option value="650.908">650.908 &nbsp;·&nbsp; G 1¼&quot;  &nbsp;·&nbsp; 90° &nbsp;·&nbsp; K=22.0</option>
+         </optgroup>
+         <optgroup label="─── Seri 651 — Tam Koni Döner Kanatçıklı ───">
+          <option value="651.308">651.308 &nbsp;·&nbsp; G 3/8&quot; &nbsp;·&nbsp; 60° &nbsp;·&nbsp; K=0.58</option>
+          <option value="651.368">651.368 &nbsp;·&nbsp; G 3/8&quot; &nbsp;·&nbsp; 60° &nbsp;·&nbsp; K=1.34</option>
+          <option value="651.448">651.448 &nbsp;·&nbsp; G 1/2&quot; &nbsp;·&nbsp; 60° &nbsp;·&nbsp; K=2.68</option>
+          <option value="651.488">651.488 &nbsp;·&nbsp; G 1/2&quot; &nbsp;·&nbsp; 90° &nbsp;·&nbsp; K=3.76</option>
+          <option value="651.608">651.608 &nbsp;·&nbsp; G 3/4&quot; &nbsp;·&nbsp; 60° &nbsp;·&nbsp; K=5.52</option>
+          <option value="651.648">651.648 &nbsp;·&nbsp; G 3/4&quot; &nbsp;·&nbsp; 90° &nbsp;·&nbsp; K=7.52</option>
+          <option value="651.808">651.808 &nbsp;·&nbsp; G 1&quot;   &nbsp;·&nbsp; 90° &nbsp;·&nbsp; K=11.2</option>
+          <option value="651.908">651.908 &nbsp;·&nbsp; G 1¼&quot;  &nbsp;·&nbsp; 90° &nbsp;·&nbsp; K=17.6</option>
+         </optgroup>
         </select>
        </div>
-       <div class="tooltip" data-tip="Her nozzle'dan gecen su miktari (L/dk)">
-        <label class="block text-sm text-slate-300 mb-2">Nozzle Debi (L/dk)</label>
-        <input type="number" id="nozzle-flow" value="5" min="0.5" max="100" step="0.5"
-               class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
+       <!-- Nozzle bilgi kartı -->
+       <div id="nozzle-info" class="md:col-span-2 bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-xs flex flex-wrap gap-x-6 gap-y-1 text-slate-400">
+        <span>Ba&#287;lant&#305;: <strong id="ni-conn" class="text-slate-200">G 3/8&quot;</strong></span>
+        <span>A&#231;&#305;: <strong id="ni-angle" class="text-slate-200">60°</strong></span>
+        <span>K fakt&#246;r&#252;: <strong id="ni-k" class="text-cyan-400">1.68</strong> L/dk·bar⁰&#8901;⁵</span>
+        <span>Bas&#305;n&#231; aral&#305;&#287;&#305;: <strong id="ni-prange" class="text-slate-200">1–10 bar</strong></span>
+        <span class="text-slate-600">Form&#252;l: Q = K × √P</span>
+       </div>
+       <!-- Nozzle debi — otomatik hesaplanır -->
+       <div class="tooltip" data-tip="Q = K × √P form&#252;l&#252; ile otomatik hesaplan&#305;r">
+        <label class="block text-sm text-slate-300 mb-2 flex items-center gap-1">
+         Nozzle Debi (L/dk)
+         <span class="text-[10px] bg-cyan-900/50 text-cyan-400 px-1.5 py-0.5 rounded-full">Otomatik</span>
+        </label>
+        <input type="number" id="nozzle-flow" readonly
+               class="w-full input-style rounded-lg px-4 py-3 text-cyan-300 font-semibold outline-none cursor-not-allowed opacity-80">
        </div>
        <div class="tooltip" data-tip="Nozzle'da istenilen &#231;&#305;k&#305;&#351; basinc&#305;">
-        <label class="block text-sm text-slate-300 mb-2">&#304;stenilen Basinc (bar)</label>
+        <label class="block text-sm text-slate-300 mb-2">&#304;stenilen Bas&#305;n&#231; (bar)</label>
         <input type="number" id="required-pressure" value="3" min="0.5" max="20" step="0.5"
+               oninput="updateNozzleFlow()"
                class="w-full input-style rounded-lg px-4 py-3 text-white outline-none">
        </div>
        <div class="tooltip" data-tip="Toplam boru hatt&#305; uzunlu&#287;u">
@@ -448,6 +483,7 @@
   <!-- ──────────────────────────────────────────
        Pompa veritabanı dosyaları (her marka ayrı)
   ─────────────────────────────────────────── -->
+  <script src="js/nozzles-lechler.js"></script>
   <script src="js/pumps-atlantis.js"></script>
   <script src="js/pumps-ebara.js"></script>
   <script src="js/pumps-goulds.js"></script>
